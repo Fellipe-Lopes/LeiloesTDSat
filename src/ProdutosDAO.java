@@ -32,12 +32,15 @@ public class ProdutosDAO {
             prep = conn.prepareStatement(sql);
             prep.setString(1, produto.getNome());
             prep.setInt(2, produto.getValor());
-            prep.setString(3, "A Venda");
+            prep.setString(3,produto.getStatus());
 
             prep.executeUpdate();
            
+            JOptionPane.showMessageDialog(null, "Item cadastrado com sucesso");
         }catch(SQLException e){
             System.out.println(e);
+            
+            JOptionPane.showMessageDialog(null, "Ocorreu um erro e o item não foi cadastrado");
         }finally{
             conn.close();
         }
