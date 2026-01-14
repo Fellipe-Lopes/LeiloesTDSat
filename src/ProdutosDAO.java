@@ -23,7 +23,7 @@ public class ProdutosDAO {
     ResultSet resultset;
     ArrayList<ProdutosDTO> listagem = new ArrayList<>();
     
-    public void cadastrarProduto (ProdutosDTO produto) throws SQLException{
+    public void cadastrarProduto (ProdutosDTO produto){
         conn = new conectaDAO().connectDB();
 
         String sql = "INSERT INTO produtos(nome, valor, status) VALUES(?,?,?)";
@@ -41,42 +41,60 @@ public class ProdutosDAO {
             System.out.println(e);
             
             JOptionPane.showMessageDialog(null, "Ocorreu um erro e o item não foi cadastrado");
-        }finally{
-            conn.close();
         }
     }
     
-    public ArrayList<ProdutosDTO> listarProdutos() throws SQLException{
-        conn = new conectaDAO().connectDB();
-        String sql = "SELECT * FROM produtos";
-        
-        try{
-            prep = conn.prepareStatement(sql);
-            resultset = prep.executeQuery();
-            
-            while(resultset.next()){
-            
-                ProdutosDTO produtos = new ProdutosDTO();
-                
-                produtos.setId(resultset.getInt("id"));
-                produtos.setNome(resultset.getString("nome"));
-                produtos.setValor(resultset.getInt("valor"));
-                produtos.setStatus(resultset.getString("status"));
-                
-                listagem.add(produtos);
-            }
-        }catch(SQLException e){
-            System.out.println(e);
-            
-            JOptionPane.showMessageDialog(null, "Erro ao listar produtos");
-        }finally{
-            conn.close();
-        }
-        return listagem;
+    public void vender(int id) {
+    String sql = "UPDATE produtos SET status = ? WHERE id = ?";
+
+    try (Connection conn = new conectaDAO().connectDB();
+         PreparedStatement prep = conn.prepareStatement(sql)) {
+
+        prep.setString(1, "Vendido");
+        prep.setInt(2, id);
+
+        prep.executeUpdate();
+
+        JOptionPane.showMessageDialog(null, "Item vendido com sucesso");
+
+    } catch (SQLException e) {
+        JOptionPane.showMessageDialog(
+            null,
+            "Ocorreu um erro e o item não foi vendido\n" + e.getMessage(),
+            "Erro",
+            JOptionPane.ERROR_MESSAGE
+        );
     }
-    
-    
-    
-        
+}
+    public ArrayList<ProdutosDTO> listarProdutos() {
+    String sql = "SELECT * FROM produtos";
+
+    try (Connection conn = new conectaDAO().connectDB();
+         PreparedStatement prep = conn.prepareStatement(sql);
+         ResultSet resultset = prep.executeQuery()) {
+
+        while (resultset.next()) {
+
+            ProdutosDTO produtos = new ProdutosDTO();
+
+            produtos.setId(resultset.getInt("id"));
+            produtos.setNome(resultset.getString("nome"));
+            produtos.setValor(resultset.getInt("valor"));
+            produtos.setStatus(resultset.getString("status"));
+
+            listagem.add(produtos);
+        }
+
+    } catch (SQLException e) {
+        JOptionPane.showMessageDialog(
+            null,
+            "Erro ao listar produtos\n" + e.getMessage(),
+            "Erro",
+            JOptionPane.ERROR_MESSAGE
+        );
+        e.printStackTrace();
+    }
+    return listagem;
+}     
 }
 
